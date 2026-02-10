@@ -64,6 +64,20 @@ export type CreatorApiResponse = {
   };
 };
 
+export type MeResponse = {
+  ok: boolean;
+  user: { id: number; email: string; role: string } | null;
+};
+
+export type AuthStartResponse = { ok: boolean };
+
+export type AuthVerifyResponse = {
+  ok: boolean;
+  user: { id: number; email: string; role: string };
+};
+
+export type LogoutResponse = { ok: boolean };
+
 export type HeadlineProfile = {
   id: number;
   platform: string;

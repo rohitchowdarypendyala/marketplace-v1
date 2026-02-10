@@ -31,8 +31,11 @@ export async function POST(req: NextRequest) {
     return badRequest('invalid or expired OTP');
   }
 
-  // Role is determined at creation time; default business if new.
-  const user: UserRow = findOrCreateUser(email, 'business');
+  // Role handling (demo): if user does not exist, create with requested role (default business).
+  const roleRaw = String(body?.role || 'business').trim().toLowerCase();
+  const desiredRole = roleRaw === 'influencer' ? 'influencer' : 'business';
+
+  const user: UserRow = findOrCreateUser(email, desiredRole);
 
   const sess = createSession(user.id);
 
