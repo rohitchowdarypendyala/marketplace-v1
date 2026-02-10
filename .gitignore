@@ -1,0 +1,27 @@
+# Marketplace V1 (read-only demo)
+
+# SQLite DB (do NOT commit)
+marketplace.db
+marketplace.db-wal
+marketplace.db-shm
+
+# Playwright profiles / debug artifacts
+.pw/
+
+# Next.js
+ui/.next/
+ui/node_modules/
+ui/out/
+
+# Backups
+ui.bak_*/
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# OS
+.DS_Store
