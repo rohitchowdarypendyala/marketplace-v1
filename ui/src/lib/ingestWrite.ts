@@ -15,7 +15,7 @@ export async function upsertCreatorAndProfile(platform: Platform, normalizedProf
 
   const existing = d
     .prepare(
-      `SELECT id, creator_id
+      `SELECT id, creator_id, trust_flags
        FROM social_profiles
        WHERE platform = ? AND profile_url = ?
        LIMIT 1`
@@ -23,6 +23,25 @@ export async function upsertCreatorAndProfile(platform: Platform, normalizedProf
     .get(platform, normalizedProfileUrl) as any;
 
   if (existing) {
+    // Merge admin_added into existing trust_flags JSON array
+    try {
+      const raw = typeof existing.trust_flags === 'string' ? existing.trust_flags : '';
+      const arr = raw ? JSON.parse(raw) : [];
+      const set = new Set(Array.isArray(arr) ? arr.map(String) : []);
+      set.add('admin_added');
+      d.prepare(`UPDATE social_profiles SET trust_flags=?, updated_at=? WHERE id=?`).run(
+        JSON.stringify(Array.from(set)),
+        nowIso(),
+        Number(existing.id)
+      );
+    } catch {
+      d.prepare(`UPDATE social_profiles SET trust_flags=?, updated_at=? WHERE id=?`).run(
+        JSON.stringify(['admin_added']),
+        nowIso(),
+        Number(existing.id)
+      );
+    }
+
     return {
       social_profile_id: Number(existing.id),
       creator_id: Number(existing.creator_id),
@@ -43,19 +62,22 @@ export async function upsertCreatorAndProfile(platform: Platform, normalizedProf
   const creatorRow = d.prepare(`SELECT last_insert_rowid() as id`).get() as any;
   const creator_id = Number(creatorRow.id);
 
-  // Create social profile (minimal required fields + admin-added tagging via trust_flags)
+  // Create social profile (must satisfy DB CHECK constraints; tag via trust_flags)
+  // NOTE: source CHECK only allows 'discovered'|'self_registered' so we keep 'discovered'.
   d.prepare(
     `INSERT INTO social_profiles(
       creator_id, platform, profile_url, handle, display_name,
+      source,
       created_at, last_fetched_at, updated_at,
       trust_flags
-    ) VALUES(?,?,?,?,?,?,?,?,?)`
+    ) VALUES(?,?,?,?,?,?,?,?,?,?)`
   ).run(
     creator_id,
     platform,
     normalizedProfileUrl,
     handle,
     handle,
+    'discovered',
     createdAt,
     null,
     createdAt,

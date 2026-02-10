@@ -29,4 +29,10 @@ export const TRUST_FLAGS = [
     severity: "high",
     description: "The profile triggered platform challenges or access blocks during collection.",
   },
+  {
+    flag: "admin_added",
+    label: "Added by website team",
+    severity: "low",
+    description: "This profile was added manually by the website team using the admin tool.",
+  },
 ];
