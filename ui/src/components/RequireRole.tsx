@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { getMe, logout } from '../lib/authClient';
 
 type Props = {
-  role: 'business' | 'influencer';
+  role: 'business' | 'influencer' | 'admin';
   children: React.ReactNode;
 };
 
